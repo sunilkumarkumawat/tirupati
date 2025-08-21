@@ -13,6 +13,7 @@ import List from './pages/task/List';
 import WhatsappTemplate from './pages/WhatsappTemplate';
 import { AppContext } from '../src/context/AppContext';
 import "../src/assets/scss/style.scss";
+import Registration from './pages/registration/registration';
 
 function App() {
   const { isAuthenticated } = useContext(AppContext);
@@ -36,6 +37,14 @@ function App() {
         element={
           <MainLayout>
             <Dashboard />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/registration/registration"
+        element={
+          <MainLayout>
+            <Registration />
           </MainLayout>
         }
       />

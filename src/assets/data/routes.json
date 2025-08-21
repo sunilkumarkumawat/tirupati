@@ -74,6 +74,67 @@
       ]
     },
     {
+      "path": "registration",
+      "title": "MENUITEMS.REGISTRATION.TEXT",
+      "iconType": "material-icons-outlined",
+      "icon": "space_dashboard",
+      "class": "menu-toggle",
+      "groupTitle": false,
+      "badge": "",
+      "badgeClass": "",
+      "role": ["ADMIN"],
+      "submenu": [
+        {
+          "path": "/registration/registration",
+          "title": "MENUITEMS.REGISTRATION.LIST.REGISTRATION",
+          "iconType": "",
+          "icon": "",
+          "class": "ml-menu",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "role": [""],
+          "submenu": []
+        },
+        {
+          "path": "",
+          "title": "MENUITEMS.DASHBOARD.LIST.DASHBOARD2",
+          "iconType": "",
+          "icon": "",
+          "class": "ml-menu",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "role": [""],
+          "submenu": []
+        },
+        {
+          "path": "",
+          "title": "MENUITEMS.DASHBOARD.LIST.DOCTOR-DASHBOARD",
+          "iconType": "",
+          "icon": "",
+          "class": "ml-menu",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "role": [""],
+          "submenu": []
+        },
+        {
+          "path": "",
+          "title": "MENUITEMS.DASHBOARD.LIST.PATIENT-DASHBOARD",
+          "iconType": "",
+          "icon": "",
+          "class": "ml-menu",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "role": [""],
+          "submenu": []
+        }
+      ]
+    },
+    {
       "path": "",
       "title": "MENUITEMS.APPOINTMENTS.TEXT",
       "iconType": "material-icons-outlined",

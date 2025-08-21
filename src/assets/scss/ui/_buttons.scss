@@ -1,0 +1,86 @@
+﻿.example-button-row button,
+.example-button-row a {
+  margin-right: 8px;
+}
+
+.btn:focus,
+.btn.focus {
+  box-shadow: none;
+}
+
+.btn-space {
+  margin-right: 10px !important;
+}
+
+.btn-outline-default {
+  border: 1px solid #005cbb;
+  color: #005cbb;
+
+  &:hover {
+    background-color: #343dff;
+    color: #ffffff;
+  }
+}
+
+.formSubmitBtn {
+  background-color: #005cbb !important;
+  color: #ffffff !important;
+
+  &:hover {
+    background-color: #004aa8 !important;
+  }
+}
+
+.formCancelBtn {
+  background-color: #ba1a1a !important;
+  color: #ffffff !important;
+
+  &:hover {
+    background-color: #a31313 !important;
+  }
+}
+
+.lbl-alert {
+  justify-content: space-between;
+  display: flex;
+}
+
+/* Role selection buttons */
+.adminBtn {
+  background-color: #0b8400 !important;
+  color: #ffffff !important;
+  padding: 10px !important;
+  width: 100px;
+  border-radius: 100px !important;
+
+  /* Rounded corners */
+  &:hover {
+    background-color: #0a6f00 !important;
+  }
+}
+
+.doctorBtn {
+  background-color: #fd7e14 !important;
+  color: #ffffff !important;
+  padding: 10px !important;
+  width: 100px;
+  border-radius: 100px !important;
+
+  /* Rounded corners */
+  &:hover {
+    background-color: #e06b0f !important;
+  }
+}
+
+.patientBtn {
+  background-color: #0d6efd !important;
+  color: #ffffff !important;
+  padding: 10px !important;
+  width: 100px;
+  border-radius: 100px !important;
+
+  /* Rounded corners */
+  &:hover {
+    background-color: #0b5ed7 !important;
+  }
+}

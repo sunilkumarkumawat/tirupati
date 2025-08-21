@@ -1,0 +1,248 @@
+@use "sass:meta";
+/*
+ *  Document   : style.css
+ *  Author     : RedStar Template
+ *  Description: This is a main style scss file for import all scss files.
+ *
+ *  Structure (with shortcodes):
+                 [1. Common ]
+                 [2. Fonts ]                   
+                 [3. Components ]       
+                 [4. Apps]                   
+                 [5. Pages ]    
+                 [6. Pugins ]        
+                 [7. UI ]     
+                 [8. Browser ]     
+
+                
+/*                 [1. Common ]                   			*/
+@import "../../../node_modules/bootstrap/dist/css/bootstrap.min.css";
+@include meta.load-css("common/_variables");
+@include meta.load-css("common/_mixins");
+@include meta.load-css("common/_customanimate.scss");
+@include meta.load-css("common/_general.scss");
+@include meta.load-css("common/_demo.scss");
+@include meta.load-css("common/_helpers.scss");
+@include meta.load-css("common/_media.scss");
+@include meta.load-css("common/_animation.scss");
+@include meta.load-css("common/_rtl.scss");
+
+/*                 [2. Fonts]                   				*/
+// @import "fonts/_material.scss";
+@include meta.load-css("fonts/fontawesome/fontawesome.scss");
+@include meta.load-css("fonts/fontawesome/regular.scss");
+@include meta.load-css("fonts/fontawesome/solid.scss");
+@include meta.load-css("fonts/fontawesome/brands.scss");
+
+/*                 [3. Components ]                   		*/
+@include meta.load-css("components/_breadcrumbs.scss");
+@include meta.load-css("components/_checkboxradio.scss");
+@include meta.load-css("components/_dropdownmenu.scss");
+@include meta.load-css("components/_feed.scss");
+@include meta.load-css("components/_formcomponents.scss");
+@include meta.load-css("components/_infobox.scss");
+@include meta.load-css("components/_inputformgroup.scss");
+@include meta.load-css("components/_labels.scss");
+@include meta.load-css("components/_leftsidebaroverlay.scss");
+@include meta.load-css("components/_navbar");
+@include meta.load-css("components/_navtabs.scss");
+@include meta.load-css("components/_noticeboard.scss");
+@include meta.load-css("components/_rightsidebar.scss");
+@include meta.load-css("components/_searchbar.scss");
+@include meta.load-css("components/_switch.scss");
+@include meta.load-css("components/_thumbnails.scss");
+@include meta.load-css("components/_todo.scss");
+@include meta.load-css("components/_settingSidebar.scss");
+
+/*                 [4. Apps]                   				*/
+@include meta.load-css("apps/_calendar.scss");
+@include meta.load-css("apps/_chat.scss");
+@include meta.load-css("apps/_contactlist.scss");
+@include meta.load-css("apps/_contactgrid.scss");
+@include meta.load-css("apps/_dragdrop.scss");
+@include meta.load-css("apps/_task.scss");
+
+/*                 [5. Pages ]                   				*/
+@include meta.load-css("pages/_dashboard.scss");
+@include meta.load-css("pages/_inbox.scss");
+@include meta.load-css("pages/_pricing.scss");
+@include meta.load-css("pages/_profile.scss");
+@include meta.load-css("pages/_timeline.scss");
+// @import "pages/_extra_pages.scss";
+@include meta.load-css("pages/_auth.scss");
+@include meta.load-css("pages/_payslip.scss");
+
+/*                 [6. Pugins ]                   				*/
+@include meta.load-css("plugins/_carousel.scss");
+@include meta.load-css("plugins/_charts.scss");
+@include meta.load-css("plugins/_formwizard.scss");
+@include meta.load-css("plugins/_imagegallery.scss");
+@include meta.load-css("plugins/_maps.scss");
+@include meta.load-css("plugins/_tables.scss");
+
+/*                 [7. UI ]                   */
+@include meta.load-css("ui/_alerts.scss");
+@include meta.load-css("ui/_badgelistgroupitem.scss");
+@include meta.load-css("ui/_buttons.scss");
+@include meta.load-css("ui/_card.scss");
+@include meta.load-css("ui/_collapse.scss");
+@include meta.load-css("ui/_dialogs.scss");
+@include meta.load-css("ui/_expansion.scss");
+@include meta.load-css("ui/_mediaobject.scss");
+@include meta.load-css("ui/_modals.scss");
+@include meta.load-css("ui/_pageloader.scss");
+@include meta.load-css("ui/_pagination.scss");
+@include meta.load-css("ui/_panels.scss");
+@include meta.load-css("ui/_preloaders.scss");
+@include meta.load-css("ui/_progressbars.scss");
+@include meta.load-css("ui/_slider.scss");
+@include meta.load-css("ui/_snackbar.scss");
+@include meta.load-css("ui/_tabs.scss");
+@include meta.load-css("ui/_tooltippopovers.scss");
+@include meta.load-css("ui/_ckeditor.scss");
+
+/*                 [8. Browser ]                   			*/
+@include meta.load-css("browser/_ie10.scss");
+@include meta.load-css("browser/_ie11.scss");
+
+
+
+/* Submenu common styles */
+ul[class^="ml-menu-"] li a {
+  background-color: transparent !important; /* remove background */
+  margin-left: 52px !important; /* give left margin */
+  display: block; /* ensures margin applies properly */
+}
+.logo-name{
+    color:black !important;
+}
+
+/* Make the right nav items flex and vertically centered */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* optional spacing between items */
+  margin-bottom: 0; /* remove default ul margin */
+  list-style: none;
+}
+
+/* Center items inside li */
+.navbar-right li {
+  display: flex;
+  align-items: center;
+}
+
+/* Icon buttons */
+.nav-notification-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+ 
+  height: 64px; /* or same as your design */
+}
+
+.side-closed.submenu-closed .sidebar-user-panel {
+  display: block !important;
+}
+.side-closed.submenu-closed .sidebar-user-panel.user-profile-area {
+  display: none !important;
+}
+.tbl-icon{
+  font-size: 20px !important;
+  height: 20px !important;
+  width: 20px !important;
+  line-height: 20px !important;
+}
+
+.css-1orzuox-MuiTableCell-root{
+  padding: 0px 16px !important;
+}
+
+// .truncate-text{
+//   color: #202125 !important;
+//   font-weight: 600 !important;
+// }
+
+body{
+  background-color: #f0f3fb !important;
+}
+
+.font-medium{
+  font-size: 20px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 0;
+}
+
+// .font-medium::after{
+//     content: "\f105";
+//   font-family: "Font Awesome 5 Free";
+//   font-size: 18px;
+//   font-weight: 900;
+//   padding: 0 5px;
+// }
+
+.sidemenu-collapse:hover{
+  color: #484c72 !important;
+}
+
+.user_name{
+  font-size: 13px !important;
+  color: #484c72 !important;
+  font-weight: 600 !important;
+}
+
+.dropdown-toggle::after{
+  display: none !important;
+}
+
+.header_toggle_button:hover{
+  background-color: #eaf1f9;
+  border-radius: 50px;
+}
+
+.nav-notification-icons{
+  height: 40px !important;
+  width: 40px !important;
+}
+
+.lang-dropdown img{
+  border-radius: 0px !important;
+}
+
+.icon-color{
+  color: #484c72 !important;
+}
+
+.font-small{
+  font-size: 15px !important;
+  color: #555 !important;
+}
+
+.navbar.active{
+  background-color: #fff !important;
+  box-shadow: 3px 0 10px #b7c0ce33;
+}
+
+.breadcrumb{
+  background-color: transparent;
+  font-size: 15px;
+  align-items: center;
+  margin: 20px 0;
+  padding: 0;
+  color: #555;
+}
+
+.truncate-15 {
+  display: inline-block;
+  max-width: 150px; /* adjust based on font-size */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}

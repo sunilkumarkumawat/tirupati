@@ -1,0 +1,145 @@
+.authContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.authCard {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.cardContent {
+  display: flex;
+  width: 100%;
+}
+
+.formSection {
+  flex: 1;
+  padding: 20px;
+}
+
+.formContent {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.lblAlert {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.adminBtn {
+  background-color: #0b8400 !important;
+  color: #ffffff !important;
+}
+
+.doctorBtn {
+  background-color: #fd7e14 !important;
+  color: #ffffff !important;
+}
+
+.patientBtn {
+  background-color: #0d6efd !important;
+  color: #ffffff !important;
+}
+
+.authForm {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.createBtn {
+  background-color: #007bff !important;
+  color: #ffffff !important;
+  padding: 10px;
+  width: 100%;
+  margin-top: 10px;
+
+  &:disabled {
+    background-color: #cccccc !important;
+    color: #666666 !important;
+  }
+}
+
+.rememberForgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.forgotPasswordLink {
+  color: #007bff;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.errorMessage {
+  color: #dc3545;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.loginLink {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.loginText {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.socialLogin {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.socialBtn {
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  padding: 5px;
+}
+
+.rightSideSection {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+}
+
+.rightSideImage {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+}

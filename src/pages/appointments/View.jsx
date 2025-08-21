@@ -1,63 +1,74 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
-Tooltip,  Table, TableBody, TableCell, TableHead, TableRow, TableContainer, 
-  IconButton, Menu, MenuItem, Checkbox, CircularProgress 
+  Tooltip, Table, TableBody, TableCell, TableHead, TableRow, TableContainer, 
+  IconButton, Menu, MenuItem, Checkbox, CircularProgress, Dialog, DialogTitle, 
+  DialogContent, DialogActions, Button, TextField, TablePagination, FormControlLabel
 } from '@mui/material';
 import { 
   Menu as MenuIcon, Search as SearchIcon, Delete as DeleteIcon, 
   AddCircleOutline as AddCircleOutlineIcon, Refresh as RefreshIcon, 
-  FileDownload as FileDownloadIcon, EditSquare as EditIcon, AddBox as AddBoxIcon, 
-  Create as CreateIcon, Refresh as RefreshMenuIcon, NoEncryption as NoEncryptionIcon, 
-  ListAlt as ListAltIcon, MailOutline as MailOutlineIcon, Call as CallIcon, Chat as ChatIcon 
+  FileDownload as FileDownloadIcon, EditSquare as EditIcon, 
+  FilterList as FilterListIcon, Visibility as VisibilityIcon
 } from '@mui/icons-material';
 import userImg from "../../assets/images/user/admin.jpg";
 import CustomBreadcrumb from '../../components/CustomBreadcrumb';
 import BookAppointment from './BookAppointment';
+import DynamicSelect from '../../components/DynamicSelect';
 
-// ✅ Stable default dataSource (outside component)
-const defaultDataSource = {
-  data: [
-    {
-      id: 1,
-      name: 'Prashant Johnson',
-      img: '/assets/images/user.jpg',
-      doctor: 'Dr. Jay Soni',
-      gender: 'male',
-      date: '2024-11-14',
-      time: '09:45',
-      mobile: '2345678901',
-      email: 'alice.j@email.com',
-      appointmentStatus: 'Scheduled',
-      visitType: 'New Patient',
-    },
-    {
-      id: 2,
-      name: 'Alice Johnson',
-      img: '/assets/images/user.jpg',
-      doctor: 'Dr. Jay Soni',
-      gender: 'female',
-      date: '2024-12-13',
-      time: '09:45',
-      mobile: '2345678901',
-      email: 'alice.j@email.com',
-      appointmentStatus: 'Scheduled',
-      visitType: 'New Patient',
-    },
-    {
-      id: 3,
-      name: 'Alice Johnson',
-      img: '/assets/images/user.jpg',
-      doctor: 'Dr. Jay Soni',
-      gender: 'female',
-      date: '2025-01-15',
-      time: '09:45',
-      mobile: '2345678901',
-      email: 'alice.j@email.com',
-      appointmentStatus: 'Scheduled',
-      visitType: 'New Patient',
-    },
-  ],
-  filteredData: []
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
+// API service
+const apiService = {
+  getAppointments: async (page, rowsPerPage, filters = {}, search = '') => {
+    try {
+      const queryParams = new URLSearchParams({
+        page: page + 1, // API pages are usually 1-based
+        limit: rowsPerPage,
+        search,
+        ...filters
+      });
+      
+      const response = await fetch(`${API_BASE_URL}/getAppointments?${queryParams}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any auth headers if needed
+          // 'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch appointments');
+      }
+      
+      const data = await response.json();
+      return {
+        data: data.appointments,
+        total: data.total,
+      };
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      throw error;
+    }
+  },
+
+  deleteAppointment: async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/deleteAppointments/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any auth headers if needed
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete appointment');
+      }
+      return true;
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      throw error;
+    }
+  }
 };
 
 const View = ({
@@ -66,18 +77,17 @@ const View = ({
   activeItem = 'View',
   columnDefinitions = [
     { def: 'select', type: 'check' },
-    { def: 'name', label: 'Name', type: 'text' },
-    { def: 'doctor', label: 'Doctor', type: 'text' },
+    { def: 'patient_name', label: 'Name', type: 'text' },
+    { def: 'patient_mobile', label: 'Mobile', type: 'phone' },
+     { def: 'specialist_id', label: 'Doctor', type: 'text' },
     { def: 'gender', label: 'Gender', type: 'text' },
-    { def: 'date', label: 'Date', type: 'date' },
-    { def: 'time', label: 'Time', type: 'time' },
-    { def: 'mobile', label: 'Mobile', type: 'phone' },
-    { def: 'email', label: 'Email', type: 'email' },
-    { def: 'appointmentStatus', label: 'Appointment Status', type: 'text' },
-    { def: 'visitType', label: 'Visit Type', type: 'text' },
+    { def: 'created', label: 'Date', type: 'date' },
+    // { def: 'time', label: 'Time', type: 'time' },
+    // { def: 'email', label: 'Email', type: 'email' },
+    { def: 'appointment_status', label: 'Appointment Status', type: 'text' },
+
     { def: 'actions', type: 'actionBtn' },
   ],
-  dataSource = defaultDataSource,
   isLoading = false,
 }) => {
   const [selection, setSelection] = useState(new Set());
@@ -87,27 +97,65 @@ const View = ({
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [dialogTitle, setDialogTitle] = useState('Add Appointment');
-  const [appointments, setAppointments] = useState(dataSource.data || []);
+  const [appointments, setAppointments] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalRows, setTotalRows] = useState(0);
+  const [openFilterModal, setOpenFilterModal] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState(
+    columnDefinitions.reduce((acc, col) => ({
+      ...acc,
+      [col.def]: col.type !== 'check' && col.type !== 'actionBtn'
+    }), {})
+  );
+  const [columnFilters, setColumnFilters] = useState(
+    columnDefinitions.reduce((acc, col) => ({
+      ...acc,
+      [col.def]: ''
+    }), {})
+  );
+  const [loading, setLoading] = useState(false);
   const searchInputRef = useRef(null);
 
-  // ✅ Fix: only run when dataSource.data changes
-  useEffect(() => {
-    setAppointments(dataSource?.data || []);
-  }, [dataSource?.data]);
+  const fetchAppointments = async () => {
+    setLoading(true);
+    try {
+      const { data, total } = await apiService.getAppointments(page, rowsPerPage, columnFilters, filter);
+    
+      setAppointments(data);
+      setTotalRows(total);
+    } catch (error) {
+      console.error('Failed to load appointments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const applyFilter = (event) => setFilter(event.target.value.toLowerCase());
+  useEffect(() => {
+    fetchAppointments();
+  }, [page, rowsPerPage, filter]);
+
+  const applyFilter = (event) => {
+    setFilter(event.target.value.toLowerCase());
+    setPage(0);
+   
+  };
 
   const masterToggle = () => {
     const newSelection = new Set(selection);
     if (isAllSelected()) {
       newSelection.clear();
     } else {
-      appointments.forEach(row => newSelection.add(row));
+      appointments.slice(page * rowsPerPage, (page + 1) * rowsPerPage)
+        .forEach(row => newSelection.add(row));
     }
     setSelection(newSelection);
   };
 
-  const isAllSelected = () => selection.size === appointments.length;
+  const isAllSelected = () => {
+    const currentPageRows = appointments.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+    return currentPageRows.every(row => selection.has(row));
+  };
 
   const toggleRow = (row) => {
     const newSelection = new Set(selection);
@@ -119,10 +167,19 @@ const View = ({
     setSelection(newSelection);
   };
 
-  const removeSelectedRows = () => {
-    const newAppointments = appointments.filter(row => !selection.has(row));
-    setAppointments(newAppointments);
-    setSelection(new Set());
+  const removeSelectedRows = async () => {
+    setLoading(true);
+    try {
+      for (const row of selection) {
+        await apiService.deleteAppointment(row.id);
+      }
+      await fetchAppointments();
+      setSelection(new Set());
+    } catch (error) {
+      console.error('Failed to delete appointments:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const addNew = () => {
@@ -138,18 +195,30 @@ const View = ({
   };
 
   const refresh = () => {
-    setAppointments(dataSource?.data || []);
     setSelection(new Set());
     setFilter('');
+    setColumnFilters(columnDefinitions.reduce((acc, col) => ({
+      ...acc,
+      [col.def]: ''
+    }), {}));
+    setPage(0);
+    fetchAppointments();
   };
 
   const exportExcel = () => {
     console.log('Export Excel');
   };
 
-  const deleteItem = (row) => {
-    const newAppointments = appointments.filter(item => item.id !== row.id);
-    setAppointments(newAppointments);
+  const deleteItem = async (row) => {
+    setLoading(true);
+    try {
+      await apiService.deleteAppointment(row.id);
+      await fetchAppointments();
+    } catch (error) {
+      console.error('Failed to delete appointment:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onContextMenu = (event, row) => {
@@ -163,22 +232,11 @@ const View = ({
     setContextMenuItem(null);
   };
 
-  const handleFormSubmit = (data) => {
-    if (selectedAppointment) {
-      const updatedAppointments = appointments.map(item =>
-        item.id === selectedAppointment.id ? { ...item, ...data, id: item.id } : item
-      );
-      setAppointments(updatedAppointments);
-    } else {
-      const newAppointment = {
-        ...data,
-        id: appointments.length > 0 ? Math.max(...appointments.map(a => a.id)) + 1 : 1,
-        img: '/assets/images/user.jpg'
-      };
-      setAppointments([...appointments, newAppointment]);
-    }
+  const handleFormSubmit = async (data) => {
+    // Assuming BookAppointment component handles the API call for add/edit
     setOpenDialog(false);
     setSelectedAppointment(null);
+    await fetchAppointments();
   };
 
   const handleDialogClose = () => {
@@ -186,14 +244,42 @@ const View = ({
     setSelectedAppointment(null);
   };
 
-  // ✅ useMemo for filtering (performance)
-  const filteredData = useMemo(() => {
-    return appointments.filter(row =>
-      Object.values(row).some(value =>
-        value && value.toString().toLowerCase().includes(filter)
-      )
-    );
-  }, [appointments, filter]);
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const toggleColumnVisibility = (columnDef) => {
+    setVisibleColumns(prev => ({
+      ...prev,
+      [columnDef]: !prev[columnDef]
+    }));
+  };
+
+  const handleFilterModalOpen = () => {
+    setOpenFilterModal(true);
+  };
+
+  const handleFilterModalClose = () => {
+    setOpenFilterModal(false);
+  };
+
+  const handleColumnFilterChange = (columnDef, value) => {
+    setColumnFilters(prev => ({
+      ...prev,
+      [columnDef]: value
+    }));
+  };
+
+  const applyColumnFilters = () => {
+    setOpenFilterModal(false);
+    setPage(0);
+      fetchAppointments();
+  };
 
   return (
     <section className="content">
@@ -238,9 +324,50 @@ const View = ({
                     <IconButton onClick={exportExcel} title="Download Excel">
                       <FileDownloadIcon />
                     </IconButton>
+                    <IconButton onClick={handleFilterModalOpen} title="Filters">
+                      <FilterListIcon />
+                    </IconButton>
+                    <IconButton
+                      onClick={(e) => setAnchorElContext({ clientX: e.clientX, clientY: e.clientY })}
+                      title="Show/Hide Columns"
+                    >
+                      <VisibilityIcon />
+                    </IconButton>
                   </div>
                 </div>
               </div>
+              <Menu
+                open={Boolean(anchorElContext)}
+                onClose={handleContextClose}
+                anchorReference="anchorPosition"
+                anchorPosition={
+                  anchorElContext ? { top: anchorElContext.clientY, left: anchorElContext.clientX } : undefined
+                }
+              >
+                {contextMenuItem ? [
+                  <MenuItem key="edit" onClick={() => { editCall(contextMenuItem); handleContextClose(); }}>
+                    <EditIcon /> Edit
+                  </MenuItem>,
+                  <MenuItem key="delete" onClick={() => { deleteItem(contextMenuItem); handleContextClose(); }}>
+                    <DeleteIcon /> Delete
+                  </MenuItem>
+                ] : columnDefinitions
+                  .filter(col => col.type !== 'check' && col.type !== 'actionBtn')
+                  .map(col => (
+                    <MenuItem key={col.def}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={visibleColumns[col.def]}
+                            onChange={() => toggleColumnVisibility(col.def)}
+                          />
+                        }
+                        label={col.label}
+                      />
+                    </MenuItem>
+                  ))
+                }
+              </Menu>
               <div className="overflow-auto">
                 <div className="responsive_table">
                   <TableContainer>
@@ -256,21 +383,20 @@ const View = ({
                             />
                           </TableCell>
                           {columnDefinitions.map((column) => {
-                            if (column.type === 'check' || column.type === 'actionBtn') return null;
+                            if (column.type === 'check' || column.type === 'actionBtn' || !visibleColumns[column.def]) {
+                              return null;
+                            }
                             return (
                               <TableCell key={column.def}>
                                 {column.label}
-                            
                               </TableCell>
-
-                              
                             );
                           })}
                           <TableCell>Actions</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {filteredData.map((row, index) => (
+                        {appointments.map((row, index) => (
                           <TableRow
                             key={row.id || `row-${index}`}
                             onContextMenu={(e) => onContextMenu(e, row)}
@@ -285,108 +411,106 @@ const View = ({
                               />
                             </TableCell>
                             {columnDefinitions.map((column) => {
-                              if (column.type === 'check' || column.type === 'actionBtn') return null;
+                              if (column.type === 'check' || column.type === 'actionBtn' || !visibleColumns[column.def]) {
+                                return null;
+                              }
                               return (
-                                  
-
-<TableCell
-  key={column.def}
-  className={column.def === "name" ? "truncate-text" : ""}
-  onClick={(e) => { e.stopPropagation(); editCall(row); }}
->
-  <div style={{ display: "flex", alignItems: "center", gap: "0px" }}>
-    {column.def === "name" ? (
-      <>
-        {userImg && <img src={userImg} className="table-img" alt="image" />}
-        <Tooltip title={row.name || "N/A"}>
-          <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
-            {row.name
-              ? row.name.slice(0, 15) + (row.name.length > 15 ? "..." : "")
-              : "N/A"}
-          </span>
-        </Tooltip>
-      </>
-    ) : column.type === "date" ? (
-      <Tooltip
-        title={
-          row[column.def]
-            ? new Date(row[column.def]).toLocaleDateString("en-US", {
-                month: "2-digit",
-                day: "2-digit",
-                year: "numeric",
-              })
-            : "N/A"
-        }
-      >
-        <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
-          {row[column.def]
-            ? new Date(row[column.def]).toLocaleDateString("en-US", {
-                month: "2-digit",
-                day: "2-digit",
-                year: "numeric",
-              })
-            : "N/A"}
-        </span>
-      </Tooltip>
-    ) : column.type === "time" ? (
-      <>
-        <span className="tbl-icon material-icons-outlined col-indigo">schedule</span>
-        <Tooltip title={row[column.def] || "N/A"}>
-          <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
-            {row[column.def] || "N/A"}
-          </span>
-        </Tooltip>
-      </>
-    ) : column.type === "phone" ? (
-      <>
-        <span className="tbl-icon material-icons-outlined col-green">call</span>
-        <Tooltip title={row[column.def] || "N/A"}>
-          <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
-            {row[column.def] || "N/A"}
-          </span>
-        </Tooltip>
-      </>
-    ) : column.type === "email" ? (
-      <>
-        <span className="tbl-icon material-icons-outlined col-red">mail</span>
-        <Tooltip title={row[column.def] || "N/A"}>
-          <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
-            {row[column.def] || "N/A"}
-          </span>
-        </Tooltip>
-      </>
-    ) : column.type === "address" ? (
-      <>
-        <span className="tbl-icon material-icons-outlined col-blue">place</span>
-        <Tooltip title={row[column.def] || "N/A"}>
-          <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
-            {row[column.def] || "N/A"}
-          </span>
-        </Tooltip>
-      </>
-    ) : column.def === "gender" ? (
-      <span
-        className={`badge ${
-          row.gender === "male"
-            ? "badge-solid-green"
-            : row.gender === "female"
-            ? "badge-solid-purple"
-            : ""
-        }`}
-      >
-        {row.gender || "N/A"}
-      </span>
-    ) : (
-      <Tooltip title={row[column.def] || "N/A"}>
-        <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
-          {row[column.def] || "N/A"}
-        </span>
-      </Tooltip>
-    )}
-  </div>
-</TableCell>
-
-
+                                <TableCell
+                                  key={column.def}
+                                  className={column.def === "name" ? "truncate-text" : ""}
+                                  onClick={(e) => { e.stopPropagation(); editCall(row); }}
+                                >
+                                  <div style={{ display: "flex", alignItems: "center", gap: "0px" }}>
+                                    {column.def === "name" ? (
+                                      <>
+                                        {userImg && <img src={userImg} className="table-img" alt="image" />}
+                                        <Tooltip title={row.name || "N/A"}>
+                                          <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
+                                            {row.name
+                                              ? row.name.slice(0, 15) + (row.name.length > 15 ? "..." : "")
+                                              : "N/A"}
+                                          </span>
+                                        </Tooltip>
+                                      </>
+                                    ) : column.type === "date" ? (
+                                      <Tooltip
+                                        title={
+                                          row[column.def]
+                                            ? new Date(row[column.def]).toLocaleDateString("en-US", {
+                                                month: "2-digit",
+                                                day: "2-digit",
+                                                year: "numeric",
+                                              })
+                                            : "N/A"
+                                        }
+                                      >
+                                        <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
+                                          {row[column.def]
+                                            ? new Date(row[column.def]).toLocaleDateString("en-US", {
+                                                month: "2-digit",
+                                                day: "2-digit",
+                                                year: "numeric",
+                                              })
+                                            : "N/A"}
+                                        </span>
+                                      </Tooltip>
+                                    ) : column.type === "time" ? (
+                                      <>
+                                        <span className="tbl-icon material-icons-outlined col-indigo">schedule</span>
+                                        <Tooltip title={row[column.def] || "N/A"}>
+                                          <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
+                                            {row[column.def] || "N/A"}
+                                          </span>
+                                        </Tooltip>
+                                      </>
+                                    ) : column.type === "phone" ? (
+                                      <>
+                                        <span className="tbl-icon material-icons-outlined col-green">call</span>
+                                        <Tooltip title={row[column.def] || "N/A"}>
+                                          <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
+                                            {row[column.def] || "N/A"}
+                                          </span>
+                                        </Tooltip>
+                                      </>
+                                    ) : column.type === "email" ? (
+                                      <>
+                                        <span className="tbl-icon material-icons-outlined col-red">mail</span>
+                                        <Tooltip title={row[column.def] || "N/A"}>
+                                          <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
+                                            {row[column.def] || "N/A"}
+                                          </span>
+                                        </Tooltip>
+                                      </>
+                                    ) : column.type === "address" ? (
+                                      <>
+                                        <span className="tbl-icon material-icons-outlined col-blue">place</span>
+                                        <Tooltip title={row[column.def] || "N/A"}>
+                                          <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
+                                            {row[column.def] || "N/A"}
+                                          </span>
+                                        </Tooltip>
+                                      </>
+                                    ) : column.def === "gender" ? (
+                                      <span
+                                        className={`badge ${
+                                          row.gender === "M"
+                                            ? "badge-solid-green"
+                                            : row.gender === "F"
+                                            ? "badge-solid-purple"
+                                            : ""
+                                        }`}
+                                      >
+                                        {row.gender || "N/A"}
+                                      </span>
+                                    ) : (
+                                      <Tooltip title={row[column.def] || "N/A"}>
+                                        <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
+                                          {row[column.def] || "N/A"}
+                                        </span>
+                                      </Tooltip>
+                                    )}
+                                  </div>
+                                </TableCell>
                               );
                             })}
                             <TableCell className="pr-0 d-flex">
@@ -394,7 +518,7 @@ const View = ({
                                 <EditIcon sx={{color:'#7180f0'}}/>
                               </IconButton>
                               <IconButton onClick={(e) => { e.stopPropagation(); deleteItem(row); }}>
-                                <DeleteIcon  sx={{color:'red'}}/>
+                                <DeleteIcon sx={{color:'red'}}/>
                               </IconButton>
                             </TableCell>
                           </TableRow>
@@ -402,19 +526,103 @@ const View = ({
                       </TableBody>
                     </Table>
                   </TableContainer>
-                  {isLoading && (
+                  {(isLoading || loading) && (
                     <div className="tbl-spinner">
                       <CircularProgress color="primary" size={40} />
                     </div>
                   )}
-                  <div>Pagination: {filteredData.length} items</div>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={totalRows}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-     
+
+ 
+    <Dialog open={openFilterModal} onClose={handleFilterModalClose} fullWidth>
+      <DialogTitle>Column Filters</DialogTitle>
+      <DialogContent>
+        {columnDefinitions
+          .filter((col) => col.type !== "check" && col.type !== "actionBtn")
+          .map((col) => {
+            if (col.def === "gender") {
+              return (
+         <DynamicSelect
+  key={col.def}
+  colDef={col}
+  value={columnFilters[col.def]} // optional controlled value
+  onChange={(val) => handleColumnFilterChange(col.def, val)}
+/>
+              );
+            } 
+            else if (col.def === "specialist_id") {
+              return (
+         <DynamicSelect
+  key={col.def}
+  colDef={col}
+  value={columnFilters[col.def]} // optional controlled value
+  onChange={(val) => handleColumnFilterChange(col.def, val)}
+/>
+              );
+            } 
+            else if (col.def === "appointment_status") {
+              return (
+           <DynamicSelect
+  key={col.def}
+  colDef={col}
+  value={columnFilters[col.def]} // optional controlled value
+  onChange={(val) => handleColumnFilterChange(col.def, val)}
+/>
+              );
+            }
+            
+            else if (col.def === "date") {
+              // 🔹 Date Picker for Date
+              return (
+                <DatePicker
+                  key={col.def}
+                  label={col.label}
+                  value={columnFilters[col.def] || null}
+                  onChange={(newValue) =>
+                    handleColumnFilterChange(col.def, newValue)
+                  }
+                  slotProps={{ textField: { fullWidth: true, margin: "normal" } }}
+                />
+              );
+            } else {
+              // 🔹 Default TextField
+              return (
+                <TextField
+                  key={col.def}
+                  label={col.label}
+                  value={columnFilters[col.def] || ""}
+                  onChange={(e) =>
+                    handleColumnFilterChange(col.def, e.target.value)
+                  }
+                  fullWidth
+                  margin="normal"
+                />
+              );
+            }
+          })}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleFilterModalClose}>Cancel</Button>
+        <Button onClick={applyColumnFilters} color="primary">
+          Apply Filters
+        </Button>
+      </DialogActions>
+    </Dialog>
+
       <BookAppointment
         open={openDialog}
         onClose={handleDialogClose}

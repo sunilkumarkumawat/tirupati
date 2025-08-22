@@ -85,7 +85,7 @@
       "role": ["ADMIN"],
       "submenu": [
         {
-          "path": "/registration/registration",
+          "path": "/registration/add",
           "title": "MENUITEMS.REGISTRATION.LIST.REGISTRATION",
           "iconType": "",
           "icon": "",

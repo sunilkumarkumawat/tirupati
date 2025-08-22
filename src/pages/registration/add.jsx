@@ -29,6 +29,10 @@ import CustomBreadcrumb from "../../components/CustomBreadcrumb";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
+const handleRoleSelect = (role) => {
+    console.log(`Selected role: ${role}`); // Replace with actual role-setting logic
+  };
+  
 const Registration = ({
     open,
     onClose,
@@ -530,6 +534,31 @@ const Registration = ({
                     />
                 </div>
                 <Paper elevation={3} className="p-3">
+                    <div>
+                        <Button
+                        variant="contained"
+                        className="adminBtn"
+                        onClick={() => handleRoleSelect('admin')}
+                        sx={{ marginRight: '10px' }}
+                        >
+                        Admin
+                        </Button>
+                        <Button
+                        variant="contained"
+                        className="doctorBtn"
+                        onClick={() => handleRoleSelect('doctor')}
+                        sx={{ marginRight: '10px' }}
+                        >
+                        Doctor
+                        </Button>
+                        <Button
+                        variant="contained"
+                        className="patientBtn"
+                        onClick={() => handleRoleSelect('patient')}
+                        >
+                        Patient
+                        </Button>
+                    </div>
                     <Typography variant="h6">{effectiveTitle}</Typography>
                     {formContent}
                 </Paper>

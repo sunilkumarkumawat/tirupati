@@ -159,9 +159,7 @@ ul[class^="ml-menu-"] li a {
   line-height: 20px !important;
 }
 
-.css-1orzuox-MuiTableCell-root{
-  padding: 0px 16px !important;
-}
+
 
 // .truncate-text{
 //   color: #202125 !important;
@@ -245,4 +243,12 @@ body{
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: middle;
+}
+
+.css-1orzuox-MuiTableCell-root{
+  padding: 7px 0px 7px 25px !important;
+  font-weight:bold !important;
+}
+.css-1dc80h3-MuiTableCell-root{
+padding: 5px 0px 5px 25px !important;
 }

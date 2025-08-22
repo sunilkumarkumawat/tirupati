@@ -417,17 +417,17 @@ const View = ({
                               return (
                                 <TableCell
                                   key={column.def}
-                                  className={column.def === "name" ? "truncate-text" : ""}
+                                  className={column.def === "patient_name" ? "truncate-text" : ""}
                                   onClick={(e) => { e.stopPropagation(); editCall(row); }}
                                 >
                                   <div style={{ display: "flex", alignItems: "center", gap: "0px" }}>
-                                    {column.def === "name" ? (
+                                    {column.def === "patient_name" ? (
                                       <>
                                         {userImg && <img src={userImg} className="table-img" alt="image" />}
-                                        <Tooltip title={row.name || "N/A"}>
+                                        <Tooltip title={row[column.def] || "N/A"}>
                                           <span className={["action", "check"].includes(column.def) ? "" : "truncate-15"}>
-                                            {row.name
-                                              ? row.name.slice(0, 15) + (row.name.length > 15 ? "..." : "")
+                                            {row[column.def]
+                                              ? row[column.def].slice(0, 15) + (row[column.def].length > 15 ? "..." : "")
                                               : "N/A"}
                                           </span>
                                         </Tooltip>
